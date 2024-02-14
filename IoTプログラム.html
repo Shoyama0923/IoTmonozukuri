@@ -1,0 +1,68 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://unpkg.com/obniz@3.24.0/obniz.js"></script>
+  <script type="text/javascript">
+    let obniz = new Obniz("9040-9224");  //自分のobnizの番号に書き換えて下さい
+    /*  ②ここに必要な変数宣言を書きます  */
+    let fLED;
+    obniz.onconnect = async function () {
+      /*  ③ここに様々なJavaScriptの処理を書きます  */
+      fLED = obniz.wired("WS2811", {gnd:1, vcc:2, din:3});
+
+      //天気予報WebAPIにアクセスしてJSONデータ取得
+      $.get("https://portal.iwasaki.ac.jp/ws/getWeather.php?q=Yokohama",
+        function(data){
+          //明日の天気予報だけ取り出す
+          let weather = data[0].day.condition.text;
+          //Webページ上に表示
+          $("#weather").text(weather);
+
+          //天気予報に「雨」という文字列が含まれていれば
+          if(weather.indexOf("雨") != -1){
+            for(let i = 0; i < 10; i++){
+            fLED.rgb(0,   0,   255);//青く点灯
+            obniz.wait(500);
+            fLED.rgb(0,0,0);
+            obniz.wait(500);
+            }
+           }    
+          //天気予報に「晴れ」という文字列が含まれていれば
+          else if(weather.indexOf("晴れ") != -1){
+            for(let i = 0; i < 10; i++){
+            fLED.rgb(255,  0,  0);//オレンジに点灯
+            obniz.wait(500);
+            fLED.rgb(0,0,0);
+            obniz.wait(500);
+            }
+          }
+          //天気予報に「曇り」という文字列が含まれていれば
+          else if(weather.indexOf("曇り") != -1){
+            for(let i = 0; i < 10; i++){
+            fLED.rgb(125,125,125);//灰色に点灯
+            obniz.wait(500);
+            fLED.rgb(0,0,0);
+            obniz.wait(500);
+            }
+          }
+          //天気予報に「雪」という文字列が含まれていれば
+          else if(weather.indexOf("雪") != -1){
+            for(let i = 0; i < 10; i++){
+            fLED.rgb(255,255,255);//灰色に点灯
+            obniz.wait(500);
+            fLED.rgb(0,0,0);
+            obniz.wait(500);
+            }
+          }
+        }
+      );
+    }
+  </script>
+</head>
+<body>
+  <div id="obniz-debug"></div>
+  <h1>Webプログラミング入門(obniz)</h1>
+  <!--  ①ここに任意のHTMLを書きます -->
+    今日の天気は <span id="weather"></span>
+</body>
